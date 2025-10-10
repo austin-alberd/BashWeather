@@ -5,7 +5,7 @@ A simple command line weather app written in bash.
 
 This was created for an assignment in CSC-2510 Intro To Devops with Unix at Tennessee Tech.
 
-This project uses ![Open Meteo](https://open-meteo.com) to get weather data and ![ipinfo.io](https://ipinfo.io/) to get location data based on your IP.
+This project uses [Open Meteo](https://open-meteo.com) to get weather data and [ipinfo.io](https://ipinfo.io/) to get location data based on your IP.
 
 The tool displays basic weather information based on your location (pulled from your IP). The emojis change depending on the weather.
 
