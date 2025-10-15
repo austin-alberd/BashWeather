@@ -14,13 +14,21 @@ data=$(curl -s "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$
 #Lets Get the Time
 time=$(echo $data | jq '.current.time' | awk -F 'T' '{print $2}'| awk 'gsub(/"/,"")')
 
+timeHour=$(echo $time | awk -F ':' '{print $1}')
+
+if [ "$timeHour" > "12" ]; then
+	time="$time PM"
+else
+	time="$time AM"
+fi
+
 #Lets get the temperature
 temperature=$(echo $data | jq '.current.temperature_2m')
 
 #3 hour precip chance (Probably Sketchy to do it this way )
-preciphOne=$(echo $data | jq '.hourly.precipitation_probability[0]')
-preciphTwo=$(echo $data | jq '.hourly.precipitation_probability[1]')
-preciphThree=$(echo $data | jq '.hourly.precipitation_probability[2]')
+preciphOne=$(echo $data | jq ".hourly.precipitation_probability[$timeHour]")
+preciphTwo=$(echo $data | jq ".hourly.precipitation_probability[$((timeHour+1))]")
+preciphThree=$(echo $data | jq ".hourly.precipitation_probability[$((timeHour+3))]")
 
 threeHourAverage=$((preciphOne+preciphTwo+preciphThree))
 threeHourAverage=$(($threeHourAverage/3))
@@ -29,14 +37,15 @@ threeHourAverage=$(($threeHourAverage/3))
 finalStatement="📍 $city, $state | ⌚ $time"
 
 # Set the conditional for rain
-if [ "$threeHourAverage" >= "50" ]; then
+if [ "$threeHourAverage" -ge 50 ]; then
 	finalStatement="$finalStatement | ⛈️ $threeHourAverage %"
-else
+fi
+if [ "$threeHourAverage" -lt 50 ]; then
 	finalStatement="$finalStatement | 🌤️ $threeHourAverage %"
 fi
 
 # Set the conditional for temperature
-if [ "$temperature" >= "75" ]; then
+if awk "BEGIN {exit !($temperature>75)}"; then
 	finalStatement="$finalStatement | 🔥 $temperature "
 else
 	finalStatement="$finalStatement | 🧊 $temperature "
